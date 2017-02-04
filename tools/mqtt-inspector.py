@@ -22,7 +22,8 @@ if __name__ == '__main__':
         if arg == '--id':
             server_id = 'inspector-' + sys.argv[idx+1]
     client = mqtt.Client(client_id="server_"+server_id)
-    client.will_set(topic="status/server/"+server_id, payload="0", qos=0, retain=False)
+    # This will msg will discard its topic
+    client.will_set(topic="status/server/"+server_id, payload='', qos=0, retain=True)
     client.on_connect = on_connect
     client.on_message = on_message
 
