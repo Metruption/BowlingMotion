@@ -46,6 +46,7 @@ class Lane:
 	A bowling lane with pins, and a ball.
 	The 'physics engine'
 	"""
+	physics_coefficent = 1 #this is an @arbitrary number, adjust as needed
 	ball_mass = 10 #this is an @arbitrary number, adjust as needed
 	ball_radius = 4.25
 
@@ -81,7 +82,25 @@ class Lane:
 		second value is the angle of the force impacted on the second circle
 		'''
 		intersect_len = abs(distance(x1,y1,x2,y2) - rad1 - rad2)
-		#todo(aaron) code this
+		radrat = rad1/rad2
+		thezone = intersect_len * radrat
+		force = thezone * physics_coefficent
+
+		if x1 == x2:
+			angle = 0
+		elif y1 == y2:
+			angle = 180 #might need to switch the 0 and 180, although this should be so rare that we dont notice this bug
+		else:
+			#how do i get this angle?
+			angle = "@todo(aaron) code this"
+		return force,angle
+
+	def unfuck_angle(angle_): #i later realized I can just do -force instead FUCK
+		angle_ = angle_ + 180
+		if angle_ >= 360:
+			angle_ = angle_ - 360
+		return angle_
+
 
 	def roll_ball(ball_x, ball_vel, ball_spin=None, ball_angle):
 		def split_vel():
@@ -92,11 +111,6 @@ class Lane:
 			ball_x = ball_x + ball_xvel
 			ball_y = ball_y + ball_yvel
 
-		def unfuck_angle(angle_): #i later realized I can just do -force instead FUCK
-			angle_ = angle_ + 180
-			if angle_ >= 360:
-				angle_ = angle_ - 360
-			return angle_
 
 		def impact_ball():
 			'''
@@ -136,7 +150,7 @@ class Lane:
 				for pin in pins: #first we detect collision for the pins
 					force, angle = collide_circles(ball_radius, ball_x, ball_y, pin.radius, pin.x, pin.y)
 					pin.impact(force, angle)
-					ball_angle = unfuck_angle(angle)
+					ball_angle = self.unfuck_angle(angle)
 					impact_ball(force, ball_angle)
 					for pin2 in pins:
 						if pin is pin2: #don't try to collide a pin with itself
@@ -144,7 +158,7 @@ class Lane:
 
 						force, angle = collide_circles(pin.radius, pin.x, pin.y, pin2.radius, pin2.x, pin2.y)
 						pin2.impact(force, angle)
-						pin.impact(force, unfuck_angle(angle))
+						pin.impact(force, self.unfuck_angle(angle))
 
 				for pin in pins: #then we move the pins
 					pin.x = pin.x + pin.xvel
