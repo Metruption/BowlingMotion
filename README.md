@@ -1,3 +1,7 @@
 # Bowling Motion
 
-@todo(aaron) make a proper readme
+Motion controlled bowling with android phones
+
+### Dependencies:
+* **Python3:** https://www.python.org/
+* **PyGame:** https://www.pygame.org/
