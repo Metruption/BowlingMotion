@@ -44,7 +44,7 @@ class Lane:
 	ball_radius = 4.25
 
 	def __init__(self):
-		start_frame()
+		self.start_frame()
 
 	def start_frame():
 		self.pins = self.ten_pins()
