@@ -3,6 +3,9 @@ import math
 #distance units are in inches
 #weight units are in kilos
 
+#HERE BE DRAGONS
+#this is hackathon code
+#hackathon code is rarely good code
 PIN_LOCATIONS = [
 [720,30],		#pin 1
 [730.4,24],		#pin 2
@@ -26,9 +29,12 @@ class Pin:
 	radius = 2.25 #our pins are going to basically be cylinders
 	mass = 1.5 #kilos
 	height = 15 #inches
-	def __init__(self, pos):
+	def __init__(self, pos, id_):
 		self.xpos, self.ypos = pos[1], pos[1]
-		self.tip = 1 #1 = standing up, 0 = horizontal
+		self.id = id_
+		self.xvel = 0
+		self.yvel = 0
+		self.standing = True
 		self.angle = 0 	#WE ARE USING DEGREES, NOT RADIANS
 						#0 is pointed NORTH
 	def impact(force, angle):
@@ -50,7 +56,7 @@ class Lane:
 		self.pins = self.ten_pins()
 
 	def ten_pins():
-		return [Pin(PIN_LOCATIONS[i]) for i in range(10)] #pin indicies are 1-10, because thats how bowling does it
+		return [Pin(PIN_LOCATIONS[i], i+1) for i in range(10)] #pin ids are 1-10, because thats how they are labeled in bowling
 
 	def distance(x1,y1,x2,y2):
 		'''
@@ -62,38 +68,96 @@ class Lane:
 		'''
 		return math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
 
+	def collide_circles(rad1, x1, y1, rad2, x2, y2):
+		'''
+		@params:
+			rad1 is radius of circle1
+			x1 is x coord of circle1's center
+			y1 is y coord of circle1's center
+			same for rad2, x2, y2
+		
+		returns two
+		first value is the force impacted on the circles
+		second value is the angle of the force impacted on the second circle
+		'''
+		intersect_len = abs(distance(x1,y1,x2,y2) - rad1 - rad2)
+		#todo(aaron) code this
+
 	def roll_ball(ball_x, ball_vel, ball_spin=None, ball_angle):
 		def split_vel():
 			ball_xvel = '@todo(someone) code this' #not aaron, he doesnt know trig
 			ball_yvel = '@todo(someone) code this' #not arrow he doesnt know trig
 
-		def update_bal_pos(ball_x, ball_y, ball_xvel, ball_yvel):
+		def update_bal_pos():
 			ball_x = ball_x + ball_xvel
 			ball_y = ball_y + ball_yvel
-		'''
-		@params:
-			ball_x is a float between 9.25 and 50.75 inclusive (you cant start out in the gutter)
-			ball_vel is how fast the ball is rolling
-			ball_spin is the spin on the ball (to make it curve) (maybe don't use this)
-			ball_angle is the angle that the ball is going in
-		'''
+
+		def unfuck_angle(angle_): #i later realized I can just do -force instead FUCK
+			angle_ = angle_ + 180
+			if angle_ >= 360:
+				angle_ = angle_ - 360
+			return angle_
+
+		def impact_ball():
+			'''
+			@params:
+				ball_x is a float between 9.25 and 50.75 inclusive (you cant start out in the gutter)
+				ball_vel is how fast the ball is rolling
+				ball_spin is the spin on the ball (to make it curve) (maybe don't use this)
+				ball_angle is the angle that the ball is going in
+
+			returns the number of pins knocked down
+			'''
+			pass
+
+
 		ball_y = 0.0
-		pins_knocked = []
+		pins_knocked = 0 #??? @todo(aaron) fix this shit
 
 		continue_simulation = True
+		physics = False
 		while continue_simulation:
 			#render_image() ????
 			split_vel()
 			update_bal_pos()
 
-			if ball_y > 50.75 or ball_y < 9.25: #check if the ball is in the gutters
+			if ball_x > 50.75 or ball_x < 9.25: #check if the ball is in the gutters
 				continue_simulation = False
 				#this is a gutter ball!
 
-			pin_distances = [distance(ball_x, ball_y, pin.xpow, pin.ypos) for pin in pins]
-			for pin_distance in pin_distances:
-				if pin_distance < ball_radius + Pin.radius:
-					#@todo(aaron): figure out how to make the ball impact the pin
+			physics = ball_y >= 720 - ball_radius - Pin.radius
+
+			if physics:
+				pin_distances = [distance(ball_x, ball_y, pin.xpow, pin.ypos) for pin in pins]
+				for pin_distance in pin_distances:
+					if pin_distance < ball_radius + Pin.radius:
+						#@todo(aaron): figure out how to make the ball impact the pin
+
+				for pin in pins: #first we detect collision for the pins
+					force, angle = collide_circles(ball_radius, ball_x, ball_y, pin.radius, pin.x, pin.y)
+					pin.impact(force, angle)
+					ball_angle = unfuck_angle(angle)
+					impact_ball(force, ball_angle)
+					for pin2 in pins:
+						if pin is pin2: #don't try to collide a pin with itself
+							continue
+
+						force, angle = collide_circles(pin.radius, pin.x, pin.y, pin2.radius, pin2.x, pin2.y)
+						pin2.impact(force, angle)
+						pin.impact(force, unfuck_angle(angle))
+
+				for pin in pins: #then we move the pins
+					pin.x = pin.x + pin.xvel
+					pin.y = pin.y + pin.yvel
+
+
+		#at this point the bowling simulation is done
+		for pin in pins:
+			if not pin.standing:
+				pins.remove pin
+				pins_knocked = pins_knocked + 1
+
+		return pins_knocked
 
 class BowlingGame:
 	"""
