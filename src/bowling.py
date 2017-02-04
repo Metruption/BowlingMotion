@@ -62,12 +62,13 @@ class Lane:
 		'''
 		return math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
 
+
 	def roll_ball(ball_x, ball_vel, ball_spin=None, ball_angle):
 		def split_vel():
 			ball_xvel = '@todo(someone) code this' #not aaron, he doesnt know trig
 			ball_yvel = '@todo(someone) code this' #not arrow he doesnt know trig
 
-		def update_bal_pos(ball_x, ball_y, ball_xvel, ball_yvel):
+		def update_bal_pos():
 			ball_x = ball_x + ball_xvel
 			ball_y = ball_y + ball_yvel
 		'''
