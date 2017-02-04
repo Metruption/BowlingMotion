@@ -1,8 +1,8 @@
 #!/bin/python
 import paho.mqtt.client as mqtt
 import sys
-
-server_id = 'inspector-0'
+import random
+server_id = 'inspector-'+str(int(random.random()*10000))
 
 # The callback for when the client receives a CONNACK response from the server.
 def on_connect(client, userdata, rc):
@@ -21,7 +21,7 @@ if __name__ == '__main__':
     for idx, arg in enumerate(sys.argv):
         if arg == '--id':
             server_id = 'inspector-' + sys.argv[idx+1]
-    client = mqtt.Client(client_id="server_"+server_id)
+    client = mqtt.Client()
     # This will msg will discard its topic
     client.will_set(topic="status/server/"+server_id, payload='', qos=0, retain=True)
     client.on_connect = on_connect
