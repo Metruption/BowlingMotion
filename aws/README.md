@@ -8,3 +8,9 @@ It uses [MQTT](http://mqtt.org/) server for connection between devices and gamin
 ``` bash
 $ ./install.sh
 ```
+
+## How to run server
+
+``` bash
+$ ./run.sh
+```
