@@ -28,6 +28,7 @@ class Pin:
 
 	radius = 2.25 #our pins are going to basically be cylinders
 	mass = 1.5 #kilos
+	tippyness = mass + 0 #the + n is arbitrary
 	height = 15 #inches
 	def __init__(self, pos, id_):
 		self.xpos, self.ypos = pos[1], pos[1]
@@ -38,13 +39,17 @@ class Pin:
 		self.angle = 0 	#WE ARE USING DEGREES, NOT RADIANS
 						#0 is pointed NORTH
 	def impact(force, angle):
-		pass #@todo(someone) code this
-
+		dx,dy = split_vector(force,angle)
+		self.xvel = dx
+		self.yvel = dy
+		if force > self.tippyness:
+			self.standing = False
 
 class Lane:
 	"""
 	A bowling lane with pins, and a ball.
 	The 'physics engine'
+	this is becoming a mangled ball class, but i REFUSE to trash it!
 	"""
 	physics_coefficent = 1 #this is an @arbitrary number, adjust as needed
 	ball_mass = 10 #this is an @arbitrary number, adjust as needed
@@ -69,6 +74,11 @@ class Lane:
 		'''
 		return math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
 
+	def split_vector(angle, magnitude):#@debug, may need to switch these
+		x = magnitude * math.cos(angle)
+		y = magnitude * math.sin(angle)
+		return x,y
+
 	def collide_circles(rad1, x1, y1, rad2, x2, y2):
 		'''
 		@params:
@@ -87,7 +97,7 @@ class Lane:
 		force = thezone * physics_coefficent
 
 		if x1 == x2:
-			angle = 0
+			angle = 0 #@debug switch these
 		elif y1 == y2:
 			angle = 180 #might need to switch the 0 and 180, although this should be so rare that we dont notice this bug
 		else:
@@ -104,15 +114,16 @@ class Lane:
 
 	def roll_ball(ball_x, ball_vel, ball_spin=None, ball_angle):
 		def split_vel():
-			ball_xvel = '@todo(someone) code this' #not aaron, he doesnt know trig
-			ball_yvel = '@todo(someone) code this' #not arrow he doesnt know trig
+			dx,dy = split_vector(force_,angle_)
+			ball_xvel = dx
+			ball_yvel = dy
 
 		def update_bal_pos():
 			ball_x = ball_x + ball_xvel
 			ball_y = ball_y + ball_yvel
 
 
-		def impact_ball():
+		def impact_ball(force, angle):
 			'''
 			@params:
 				ball_x is a float between 9.25 and 50.75 inclusive (you cant start out in the gutter)
@@ -122,11 +133,12 @@ class Lane:
 
 			returns the number of pins knocked down
 			'''
-			pass
+			imp_x = force_ * math.sin(angle_) #these two might be mixed up
+			imp_y = force_ * math.cos(angle_) #@debug you should switch these
 
 
 		ball_y = 0.0
-		pins_knocked = 0 #??? @todo(aaron) fix this shit
+		pins_knocked = 0
 
 		continue_simulation = True
 		physics = False
@@ -142,11 +154,6 @@ class Lane:
 			physics = ball_y >= 720 - ball_radius - Pin.radius
 
 			if physics:
-				pin_distances = [distance(ball_x, ball_y, pin.xpow, pin.ypos) for pin in pins]
-				for pin_distance in pin_distances:
-					if pin_distance < ball_radius + Pin.radius:
-						#@todo(aaron): figure out how to make the ball impact the pin
-
 				for pin in pins: #first we detect collision for the pins
 					force, angle = collide_circles(ball_radius, ball_x, ball_y, pin.radius, pin.x, pin.y)
 					pin.impact(force, angle)
@@ -168,7 +175,7 @@ class Lane:
 		#at this point the bowling simulation is done
 		for pin in pins:
 			if not pin.standing:
-				pins.remove pin
+				pins.remove(pin)
 				pins_knocked = pins_knocked + 1
 
 		return pins_knocked
@@ -178,7 +185,7 @@ class BowlingGame:
 	The game!
 	"""
 	#do we need this?
-	#@todo(aaron) answer the above question
 	#the answer is yes!
 	#it has a bowling lane
 	#it keeps track of scoring
+	#also it probably handles rendering...?
