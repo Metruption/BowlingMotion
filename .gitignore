@@ -1,0 +1,4 @@
+
+# Ignore aws stuff
+aws/*.deb
+aws/*.key

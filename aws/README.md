@@ -6,5 +6,5 @@ It uses [MQTT](http://mqtt.org/) server for connection between devices and gamin
 ## Dependancies
 
 ``` bash
-$ install.sh
+$ ./install.sh
 ```
