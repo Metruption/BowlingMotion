@@ -6,3 +6,6 @@
 aws/*.deb*
 aws/*.key*
 aws/*.tar.gz*
+
+# Ignore pyc files
+*.pyc
