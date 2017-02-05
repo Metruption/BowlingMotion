@@ -39,7 +39,7 @@ class Pin:
 		self.angle = 0 	#WE ARE USING DEGREES, NOT RADIANS
 						#0 is pointed NORTH
 	def impact(force, angle):
-		dx,dy = split_vector(force,angle)
+		dx,dy = split_vector(force/self.mass,angle)
 		self.xvel = dx
 		self.yvel = dy
 		if force > self.tippyness:
@@ -134,20 +134,22 @@ class Lane:
 			ball_x = ball_x + ball_xvel
 			ball_y = ball_y + ball_yvel
 
-		def impact_ball(force, angle):
+		def impact_ball(force_, angle_):
 			'''
 			@params:
-				ball_x is a float between 9.25 and 50.75 inclusive (you cant start out in the gutter)
-				ball_vel is how fast the ball is rolling
-				ball_spin is the spin on the ball (to make it curve) (maybe don't use this)
-				ball_angle is the angle that the ball is going in
+				force is the force impacted on the ball
+				angle is the angle of the force
 
 			returns the number of pins knocked down
 			'''
 			imp_x = force_ * math.sin(math.radians(angle_)) #these two might be mixed up
 			imp_y = force_ * math.cos(math.radians(angle_)) #@debug you should switch these
+			xvel = xvel + imp_x
+			yvel = yvel + imp_y
 
 
+		ball_angle = angle
+		ball_vel = force/ball_mass
 		ball_y = 0.0
 		pins_knocked = 0
 
@@ -191,12 +193,7 @@ class Lane:
 
 		return pins_knocked
 
-class BowlingGame:
+class BowlingScore:
 	"""
-	The game!
+	Keeps track of the scors in the boling game
 	"""
-	#do we need this?
-	#the answer is yes!
-	#it has a bowling lane
-	#it keeps track of scoring
-	#also it probably handles rendering...?
