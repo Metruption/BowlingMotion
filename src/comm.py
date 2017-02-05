@@ -76,16 +76,20 @@ class Comm:
             if msg.payload.decode() == "1":
                 add_or_remove = True
             device_num = int(msg.topic[len("status/device/"):])
-            if add_or_remove:
+            if add_or_remove and (device_num not in Comm.remotes):
                 Comm.remotes.append(device_num)
                 Comm.sensor_data[device_num] = {"last_updated":time.time()}
                 print(str(device_num) + ' added!')
+                is_changed = True
+            elif add_or_remove and (device_num in Comm.remotes):
+                # No change
+                pass
             else:
                 Comm.remotes.remove(device_num)
                 Comm.sensor_data.pop(device_num)
                 print(str(device_num) + ' Deleted')
+                is_changed = True
             print('Now '+str(Comm.remotes))
-            is_changed = True
         # Update remote sensor data
         if (re.match("device/\d*", msg.topic)):
             device_num = int(msg.topic[len("device/"):])
@@ -93,7 +97,7 @@ class Comm:
             # Last updated time
             data["last_updated"] = time.time()
             Comm.sensor_data[device_num] = data
-            print('Data from '+ str(device_num) + ": " + str(data))
+            #print('Data from '+ str(device_num) + ": " + str(data))
             is_changed = True
         # Trigger event
         if is_changed:
@@ -118,11 +122,26 @@ def on_change():
     print("Something changed")
     pass
 
+import matplotlib as mpl
+from mpl_toolkits.mplot3d import Axes3D
+import numpy as np
+import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
     comm = Comm(host="ec2-52-23-213-20.compute-1.amazonaws.com", on_change=on_change)
     # wait for 5 second.
-    time.sleep(5)
+    time.sleep(3)
+
+    # init plot
+    mpl.rcParams['legend.fontsize'] = 10
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+    ax.set_xlim(-15, 15)
+    ax.set_ylim(-15, 15)
+    ax.set_zlim(-15, 15)
+    plt.ion()
+    line, = ax.plot([0], [0], [0], label='accelometer curve')
+    ax.legend()
 
     # Infinite loop
     while True:
@@ -130,3 +149,12 @@ if __name__ == "__main__":
             print("wait for " + str(dev_id) + "...")
             data = comm.get_data_wait(dev_id)
             print("Data taken: " + str(data))
+            # Plot
+            x = data["x"]
+            y = data["y"]
+            z = data["z"]
+            line.set_xdata(x)
+            line.set_ydata(y)
+            line.set_3d_properties(z)
+            fig.canvas.draw()
+            plt.show()
