@@ -6,6 +6,7 @@ import engine
 import comm
 import time
 from events import NEW_FRAME, CONTINUE_FRAME, GAME_END
+from pygame.locals import *
 
 PIN_LOCATIONS = [
 [720,30],		#pin 1
@@ -88,7 +89,7 @@ class BowlingGame: #@todo(bumsik): add a socket and eventlistener to get rolls f
 			x_force is a real number
 			y_force is a real number
 		'''
-		Ball.reset(self)
+		self.fball.reset(self)
 
 		pins_knocked = 0
 		continue_simulation = True
@@ -173,7 +174,7 @@ class BowlingGame: #@todo(bumsik): add a socket and eventlistener to get rolls f
 
 	def populate_actorlist(self):
 		actors = [pin for pin in self.pins]
-		actors.append(self.Ball)
+		actors.append(self.ball)
 		self.actors = actors
 
 

@@ -88,8 +88,8 @@ class Actor:
 
 
 class Pin(Actor):
-	def __init__(self, xpos, ypos, radius2=2.5, mass=1.5, frict=5):
-		Actor.__init__(radius, mass, frict, xpos, ypos)
+	def __init__(self, xpos, ypos, radius=2.5, mass=1.5, frict=5):
+		Actor.__init__(self, radius, mass, frict, xpos, ypos)
 		standing = True
 
 	def impact(self, xforce, yforce):
