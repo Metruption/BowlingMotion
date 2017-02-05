@@ -5,7 +5,7 @@ import mathutil
 def main():
 	print("Not for human consumption. Please evacuate the premises.")
 
-if name == '__main__':
+if __name__ == '__main__':
 	main()
 
 class Actor:
@@ -88,7 +88,7 @@ class Actor:
 
 
 class Pin(Actor):
-	def __init__(self, radius2=2.5, mass=1.5, frict=5, xpos, ypos):
+	def __init__(self, xpos, ypos, radius2=2.5, mass=1.5, frict=5):
 		Actor.__init__(radius, mass, frict, xpos, ypos)
 		standing = True
 
@@ -99,7 +99,8 @@ class Pin(Actor):
 
 class Ball(Actor): #yeah this is just a wrapper...
 	def __init__(self, radius=4.25, mass=10, frict=1.1, xpos=30, ypos=0):
-		Actor.__init__(radius, mass, frict, xpos, ypos)
+		Actor.__init__(self, radius, mass, frict, xpos, ypos)
+		None #if this makes it work i fucking swear to god
 
 	def reset():
 		self.xpos = 30

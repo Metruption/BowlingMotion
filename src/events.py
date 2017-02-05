@@ -3,7 +3,7 @@
 def main():
 	print("Not for human consumption. Please evacuate the premises.")
 
-if name == '__main__':
+if __name__ == '__main__':
 	main()
 
 NEW_FRAME = 10

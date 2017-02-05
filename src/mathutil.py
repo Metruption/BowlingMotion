@@ -4,7 +4,7 @@ import math
 def main():
 	print("Not for human consumption. Please evacuate the premises.")
 
-if name == '__main__':
+if __name__ == '__main__':
 	main()
 
 def distance(x1,y1,x2,y2):
