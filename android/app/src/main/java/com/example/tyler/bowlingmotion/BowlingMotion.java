@@ -189,22 +189,26 @@ public class BowlingMotion extends AppCompatActivity implements SensorEventListe
         }
     }
 
+    /*
     protected void onPause() {
         super.onPause();
         manager.unregisterListener(this);
         try {
+            client.publish("status/device/" + deviceID, "".getBytes(), 1, true);
             client.disconnect();
         } catch (MqttException e) {
             e.printStackTrace();
         }
         client.close();
     }
+    */
 
     protected void onDestroy() {
         super.onDestroy();
         manager.unregisterListener(this);
         try {
-            client.disconnect();
+            client.publish("status/device/" + deviceID, "".getBytes(), 1, true);
+            //client.disconnect(); //TODO: Nescessary?
         } catch (MqttException e) {
             e.printStackTrace();
         }
@@ -240,8 +244,6 @@ public class BowlingMotion extends AppCompatActivity implements SensorEventListe
                         e.printStackTrace();
                     }
                     break;
-
-
             }
             return true;
         }
