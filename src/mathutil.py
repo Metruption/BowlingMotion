@@ -26,3 +26,14 @@ def slope(x1, y1, x2, y2):
 	returns the slope of a line drawn between the two points
 	'''
 	return (y1 - y2)/(x1 - x2)
+
+def between(num, min_, max_):
+	'''
+	@params:
+		num is a real number
+		min_ is a real number
+		max_ is a real number which should be larger than min_
+
+	returns true if number is between min_ and max_
+	'''
+	return num >= min_ and num <= max_
