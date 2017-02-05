@@ -68,6 +68,8 @@ if __name__ == '__main__':
 
     print('Connection confirmed!')
     print('Now start publishing sensor value?')
+    # Wait
+    import time
     while True:
-        pass
+        time.sleep(1000)
     pass
