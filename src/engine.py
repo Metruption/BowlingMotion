@@ -24,14 +24,14 @@ class Actor:
 		self.frict = frict
 
 
-	def impact(xforce, yforce):
+	def impact(self, xforce, yforce):
 		dx = xforce / self.mass
 		dy = yforce / self.mass
 		self.xvel += dx
 		self.yvel += dy
 
 
-	def detect_collision(target):
+	def detect_collision(self, target):
 		'''
 		@params:
 			target is an Actor
@@ -45,7 +45,7 @@ class Actor:
 		return safe_zone > distance
 
 
-	def resolve_collision(target):
+	def resolve_collision(self, target):
 		'''
 		@params:
 			target is an Actor
@@ -76,7 +76,7 @@ class Actor:
 												#then you need to switch the minuses around
 		return True
 
-		def update_position():
+		def update_position(self):
 			'''
 			updates the actor's position
 			it will move its velocity in units
@@ -92,7 +92,7 @@ class Pin(Actor):
 		Actor.__init__(radius, mass, frict, xpos, ypos)
 		standing = True
 
-	def impact(xforce, yforce):
+	def impact(self, xforce, yforce):
 		Actor.impact(xforce, yforce)
 		if math.sqrt(xforce**2 + yforce**2) > mass:
 			standing = False
@@ -102,6 +102,6 @@ class Ball(Actor): #yeah this is just a wrapper...
 		Actor.__init__(self, radius, mass, frict, xpos, ypos)
 		None #if this makes it work i fucking swear to god
 
-	def reset():
+	def reset(self):
 		self.xpos = 30
 		self.ypos = 0

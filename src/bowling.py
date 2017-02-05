@@ -72,7 +72,7 @@ class BowlingGame: #@todo(bumsik): add a socket and eventlistener to get rolls f
 							#create a NEW_FRAME event  
 							#as long as we use lazy_event_handler this won't matter
 
-	def reset_pins():
+	def reset_pins(self):
 		self.pins = []
 		for i in range(10):
 			y_pos = PIN_LOCATIONS[i][0]
@@ -82,13 +82,13 @@ class BowlingGame: #@todo(bumsik): add a socket and eventlistener to get rolls f
 		#@todo(aaron): figure out how the y_bounds will be stored
 		self.populate_actorlist()
 
-	def throw_ball(x_force, y_force):
+	def throw_ball(self, x_force, y_force):
 		'''
 		@params:
 			x_force is a real number
 			y_force is a real number
 		'''
-		Ball.reset()
+		Ball.reset(self)
 
 		pins_knocked = 0
 		continue_simulation = True
@@ -131,7 +131,7 @@ class BowlingGame: #@todo(bumsik): add a socket and eventlistener to get rolls f
 			pygame.event.post(frame_event)
 
 
-	def is_on_screen(Actor):
+	def is_on_screen(self, Actor):
 		'''
 		@params:
 			Actor is an actor that the game needs to keep track of
@@ -164,14 +164,14 @@ class BowlingGame: #@todo(bumsik): add a socket and eventlistener to get rolls f
 					data[axis] = sum(data[axis]) / len(data[axis])
 				return (data["x"], data["y"])
 
-	def render_lane():
+	def render_lane(self):
 		'''
 		implement this LAST
 		@todo(aaron)
 		'''
 		pass
 
-	def populate_actorlist():
+	def populate_actorlist(self):
 		actors = [pin for pin in self.pins]
 		actors.append(self.Ball)
 		self.actors = actors
