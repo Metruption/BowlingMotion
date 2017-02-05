@@ -35,8 +35,13 @@ class BowlingGame: #@todo(bumsik): add a socket and eventlistener to get rolls f
 
 		game_window = pygame.display.set_mode((800, 600))
 
-		ball = engine.Ball()
+		lazy_event_handler = True
+		#this is just whether or not to start a new frame
+		#in case we don't have time to add proper scoring
+		self.actors = []
+		self.ball = engine.Ball()
 		reset_pins()
+
 		while True: # main game loop
 			for event in pygame.event.get():
 				if event.type == QUIT:
@@ -54,6 +59,7 @@ class BowlingGame: #@todo(bumsik): add a socket and eventlistener to get rolls f
 					pass #what it should actually do @todo(aaron):
 							#display text saying throw another ball to restart the game
 							#create a NEW_FRAME event  
+							#as long as we use lazy_event_handler this won't matter
 
 	def reset_pins():
 		self.pins = []
@@ -62,7 +68,8 @@ class BowlingGame: #@todo(bumsik): add a socket and eventlistener to get rolls f
 			x_pos = PIN_LOCATIONS[i][0]
 			self.pins.append(engine.Pin(x_pos, y_pos))
 		#@todo(aaron): add something to reset the y_bounds
-		#@todo(aaron): figure out how 
+		#@todo(aaron): figure out how the y_bounds will be stored
+		populate_actorlist()
 
 	def throw_ball(x_force, y_force):
 		'''
@@ -70,7 +77,21 @@ class BowlingGame: #@todo(bumsik): add a socket and eventlistener to get rolls f
 			x_force is a real number
 			y_force is a real number
 		'''
-			pass #@todo(aaron) code this
+		Ball.reset()
+
+		pins_knocked = 0
+		continue_simulation = True
+		physics = False #this is set to false
+						#we don't need to do physics until the ball is near the pins
+
+		while continue_simulation:
+			if ball_x > 50.75 or ball_x < 9.25: #check if the ball is in the gutters
+				continue_simulation = False
+				#this is a gutter ball!
+
+			for actor in self.actors:
+				actor.update_position()
+			#@todo(aaron) finish coding this
 
 	def is_on_screen(Actor):
 		'''
@@ -80,7 +101,7 @@ class BowlingGame: #@todo(bumsik): add a socket and eventlistener to get rolls f
 		returns true if Actor is in the part of the bowling alley that we are rendering.
 		'''
 		pass #@todo(aaron) code this
-		
+
 	def wait_for_server():
 		'''
 		Waits until the server sends data, then returns an interpretation of the data.
@@ -98,6 +119,11 @@ class BowlingGame: #@todo(bumsik): add a socket and eventlistener to get rolls f
 		@todo(aaron)
 		'''
 		pass
+
+	def populate_actorlist():
+		actors = [pin for pin in self.pins]
+		actors.append(self.Ball)
+		self.actors = actors
 
 
 

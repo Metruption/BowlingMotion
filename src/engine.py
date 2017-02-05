@@ -76,6 +76,15 @@ class Actor:
 												#then you need to switch the minuses around
 		return True
 
+		def update_position():
+			'''
+			updates the actor's position
+			it will move its velocity in units
+			'''
+			xpos += xvel
+			ypos += yvel
+
+
 
 
 class Pin(Actor):

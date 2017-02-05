@@ -39,8 +39,11 @@ def calculate():
                 
                 
                 
-        
-        
+'''
+aaron's big bad wishlist!
+ability to call a function get_score_result(numpins)
+then it returns a an event type (see events.py)
+'''
         
         
     
