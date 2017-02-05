@@ -11,7 +11,7 @@ if name == '__main__':
 class Actor:
 	"""These poor guys get knocked around a lot."""
 
-	radius = 2.25 #our pins are going to basically be cylinders
+	radius = 2.25
 	mass = 1.5 #kilos
 	height = 15 #inches
 	def __init__(self, radius, mass, frict, xpos, ypos):
@@ -72,8 +72,8 @@ class Actor:
 
 		#obeying newton's third law
 		self.impact(x_impact/2, y_impact/2)
-		target.impact(-x_impact/2, -y_impact/2)
-
+		target.impact(-x_impact/2, -y_impact/2) #if objects are being impacted deeper into oneaother
+												#then you need to switch the minuses around
 		return True
 
 
@@ -89,5 +89,9 @@ class Pin(Actor):
 			standing = False
 
 class Ball(Actor): #yeah this is just a wrapper...
-	def __init__(self, radius=4.25, mass=10, frict=1.1, xpos=30, ypos=):
+	def __init__(self, radius=4.25, mass=10, frict=1.1, xpos=30, ypos=0):
 		Actor.__init__(radius, mass, frict, xpos, ypos)
+
+	def reset():
+		self.xpos = 30
+		self.ypos = 0

@@ -34,15 +34,25 @@ class BowlingGame: #@todo(bumsik): add a socket and eventlistener to get rolls f
 
 		game_window = pygame.display.set_mode((800, 600))
 
+		ball = engine.Ball()
 		reset_pins()
 		while True: # main game loop
 			for event in pygame.event.get():
 				if event.type == QUIT:
 					pygame.quit()
 					sys.exit()
+
 				if event.type == NEW_FRAME #@todo(jamie) have the scorer create a NEW_FRAME event after each frame
 					reset_pins()
-					pass #@todo(bumsik) have an eventlistener wait until we get the input
+					throw_ball(wait_for_server())
+
+				if event.type == CONTINUE_FRAME
+					throw_ball(wait_for_server())
+
+				if event.type == GAME_END:
+					pass #what it should actually do @todo(aaron):
+							#display text saying throw another ball to restart the game
+							#create a NEW_FRAME event  
 
 	def reset_pins():
 		self.pins = []
@@ -50,6 +60,43 @@ class BowlingGame: #@todo(bumsik): add a socket and eventlistener to get rolls f
 			y_pos = PIN_LOCATIONS[i][0]
 			x_pos = PIN_LOCATIONS[i][0]
 			self.pins.append(engine.Pin(x_pos, y_pos))
+
+	def throw_ball(x_force, y_force):
+		'''
+		@params:
+			x_force is a real number
+			y_force is a real number
+		'''
+			pass #@todo(aaron) code this
+
+	def is_on_screen(Actor):
+		'''
+		@params:
+			Actor is an actor that the game needs to keep track of
+
+		returns true if Actor is in the part of the bowling alley that we are rendering.
+		'''
+		if 
+
+	def wait_for_server():
+		'''
+		Waits until the server sends data, then returns an interpretation of the data.
+		
+		returns two things
+		x_force, y_force
+
+		note: if we can't make it work, then use a two member tuple.
+		'''
+		pass
+
+	def render_lane():
+		'''
+		implement this LAST
+		@todo(aaron)
+		'''
+		pass
+
+
 
 #notes from aaron http://inventwithpython.com/pygame/chapter2.html
 #http://inventwithpython.com/pygame/chapter3.html
