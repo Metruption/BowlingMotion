@@ -54,10 +54,18 @@ class Comm:
             is_changed = True
         # Add remotes
         if (re.match("status/device/\d*", msg.topic)):
+            add_or_remove = False
+            if msg.payload.decode() == "1":
+                add_or_remove = True
             device_num = int(msg.topic[len("status/device/"):])
-            Comm.remotes.append(device_num)
+            if add_or_remove:
+                Comm.remotes.append(device_num)
+                print(str(device_num) + ' added!')
+            else:
+                Comm.remotes.remove(device_num)
+                print(str(device_num) + ' Deleted')
+            print('Now '+str(Comm.remotes))
             is_changed = True
-            print(str(device_num) + ' added!')
         # Trigger event
         if is_changed:
             Comm.on_change()
