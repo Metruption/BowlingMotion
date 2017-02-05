@@ -2,6 +2,11 @@ import paho.mqtt.client as mqtt
 import re
 import json
 import time
+import matplotlib as mpl
+from mpl_toolkits.mplot3d import Axes3D
+import numpy as np
+import matplotlib.pyplot as plt
+
 
 server_id = 'aws'
 
@@ -31,6 +36,17 @@ class Comm:
 
         # Start mqtt Comm.client
         Comm.client.loop_start()
+
+        # init plot
+        mpl.rcParams['legend.fontsize'] = 10
+        self.fig = plt.figure()
+        self.ax = self.fig.gca(projection='3d')
+        self.ax.set_xlim(-15, 15)
+        self.ax.set_ylim(-15, 15)
+        self.ax.set_zlim(-15, 15)
+        plt.ion()
+        self.line, = self.ax.plot([0], [0], [0], label='accelometer curve')
+        self.ax.legend()
         pass
 
     def get_remotes(self):
@@ -46,6 +62,17 @@ class Comm:
         while start_time == Comm.sensor_data[id]["last_updated"]:
             pass
         return self.get_data_now(id)
+
+    def plot(self, data):
+        # Plot
+        x = data["x"]
+        y = data["y"]
+        z = data["z"]
+        self.line.set_xdata(x)
+        self.line.set_ydata(y)
+        self.line.set_3d_properties(z)
+        self.fig.canvas.draw()
+        plt.show()
 
     # The callback for when the client receives a CONNACK response from the server.
     @staticmethod
@@ -122,26 +149,11 @@ def on_change():
     print("Something changed")
     pass
 
-import matplotlib as mpl
-from mpl_toolkits.mplot3d import Axes3D
-import numpy as np
-import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
     comm = Comm(host="ec2-52-23-213-20.compute-1.amazonaws.com", on_change=on_change)
     # wait for 5 second.
     time.sleep(3)
-
-    # init plot
-    mpl.rcParams['legend.fontsize'] = 10
-    fig = plt.figure()
-    ax = fig.gca(projection='3d')
-    ax.set_xlim(-15, 15)
-    ax.set_ylim(-15, 15)
-    ax.set_zlim(-15, 15)
-    plt.ion()
-    line, = ax.plot([0], [0], [0], label='accelometer curve')
-    ax.legend()
 
     # Infinite loop
     while True:
@@ -149,12 +161,4 @@ if __name__ == "__main__":
             print("wait for " + str(dev_id) + "...")
             data = comm.get_data_wait(dev_id)
             print("Data taken: " + str(data))
-            # Plot
-            x = data["x"]
-            y = data["y"]
-            z = data["z"]
-            line.set_xdata(x)
-            line.set_ydata(y)
-            line.set_3d_properties(z)
-            fig.canvas.draw()
-            plt.show()
+            comm.plot(data)

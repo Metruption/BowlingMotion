@@ -9,5 +9,5 @@ Motion controlled bowling with android phones
 * **scipy:** https://www.scipy.org/
 
 ```bash
-pip install paho-mqtt numpy matplotlib
+pip install Pygame paho-mqtt numpy matplotlib
 ```

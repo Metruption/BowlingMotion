@@ -3,6 +3,8 @@ import math
 import pygame
 import sys
 import engine
+from .comm import Comm
+import time
 
 PIN_LOCATIONS = [
 [720,30],		#pin 1
@@ -20,11 +22,19 @@ PIN_LOCATIONS = [
 def main():
 	print("Not for human consumption. Please evacuate the premises.")
 
-if name == '__main__':
+if __name__ == '__main__':
 	main()
+
+
 
 class BowlingGame: #@todo(bumsik): add a socket and eventlistener to get rolls from the server
 	def __init__(self):
+		# Connect server
+		self.comm = Comm(host="ec2-52-23-213-20.compute-1.amazonaws.com", on_change=lambda: None)
+		# wait for 3 second. To connect things
+		time.sleep(3)
+
+		# Init game
 		pygame.init
 
 		#load images
@@ -78,7 +88,7 @@ class BowlingGame: #@todo(bumsik): add a socket and eventlistener to get rolls f
 		'''
 		if 
 
-	def wait_for_server():
+	def wait_for_server(self):
 		'''
 		Waits until the server sends data, then returns an interpretation of the data.
 		
@@ -87,6 +97,19 @@ class BowlingGame: #@todo(bumsik): add a socket and eventlistener to get rolls f
 
 		note: if we can't make it work, then use a two member tuple.
 		'''
+		while True:
+			for dev_id in self.comm.get_remotes():
+				# 1. get data
+				print("wait for " + str(dev_id) + "...")
+				data = self.comm.get_data_wait(dev_id)
+				print("Data taken: " + str(data))
+				# 2. plot
+				self.comm.plot(data)
+				# 3. calculate
+				# FIXME: @kbumsik improve calculation of x and y. Currently only average list
+				for axis in ("x", "y"):
+					data[axis] = sum(data[axis]) / len(data[axis])
+				yield (data["x"], data["y"])
 		pass
 
 	def render_lane():
