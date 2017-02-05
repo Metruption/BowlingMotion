@@ -6,3 +6,4 @@ Motion controlled bowling with android phones
 * **Python3:** https://www.python.org/
 * **PyGame:** https://www.pygame.org/
 * **paho-mqtt:** https://eclipse.org/paho/clients/python/
+* **scipy:** https://www.scipy.org/
