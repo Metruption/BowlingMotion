@@ -33,6 +33,20 @@ class Comm:
         Comm.client.loop_start()
         pass
 
+    def get_remotes(self):
+        return Comm.remotes
+
+    def get_data_now(self, id):
+        obj = Comm.sensor_data[id].copy()
+        obj.pop("last_updated")
+        return obj
+
+    def get_data_wait(self, id):
+        start_time = Comm.sensor_data[id]["last_updated"]
+        while start_time == Comm.sensor_data[id]["last_updated"]:
+            pass
+        return self.get_data_now(id)
+
     # The callback for when the client receives a CONNACK response from the server.
     @staticmethod
     def on_connect(client, userdata, rc):
@@ -45,7 +59,7 @@ class Comm:
     # The callback for when a PUBLISH message is received from the server.
     @staticmethod
     def on_message(client, userdata, msg):
-        print("Topic: "+msg.topic+"\n\tPayload: "+str(msg.payload))
+        # print("Topic: "+msg.topic+"\n\tPayload: "+str(msg.payload))
         is_changed = False
         # Update server status
         if ("status/server/" + server_id) == msg.topic:
@@ -64,7 +78,7 @@ class Comm:
             device_num = int(msg.topic[len("status/device/"):])
             if add_or_remove:
                 Comm.remotes.append(device_num)
-                Comm.sensor_data[device_num] = None
+                Comm.sensor_data[device_num] = {"last_updated":time.time()}
                 print(str(device_num) + ' added!')
             else:
                 Comm.remotes.remove(device_num)
@@ -104,9 +118,15 @@ def on_change():
     print("Something changed")
     pass
 
+
 if __name__ == "__main__":
     comm = Comm(host="ec2-52-23-213-20.compute-1.amazonaws.com", on_change=on_change)
+    # wait for 5 second.
+    time.sleep(5)
 
     # Infinite loop
     while True:
-        time.sleep(1000)
+        for dev_id in comm.get_remotes():
+            print("wait for " + str(dev_id) + "...")
+            data = comm.get_data_wait(dev_id)
+            print("Data taken: " + str(data))
