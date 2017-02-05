@@ -1,4 +1,7 @@
 
+# Ignore IDE setting
+.idea
+
 # Ignore aws stuff
 aws/*.deb*
 aws/*.key*
