@@ -5,6 +5,7 @@ import sys
 import engine
 from .comm import Comm
 import time
+from events import NEW_FRAME, CONTINUE_FRAME, GAME_END
 
 PIN_LOCATIONS = [
 [720,30],		#pin 1
@@ -70,6 +71,8 @@ class BowlingGame: #@todo(bumsik): add a socket and eventlistener to get rolls f
 			y_pos = PIN_LOCATIONS[i][0]
 			x_pos = PIN_LOCATIONS[i][0]
 			self.pins.append(engine.Pin(x_pos, y_pos))
+		#@todo(aaron): add something to reset the y_bounds
+		#@todo(aaron): figure out how 
 
 	def throw_ball(x_force, y_force):
 		'''
@@ -97,6 +100,7 @@ class BowlingGame: #@todo(bumsik): add a socket and eventlistener to get rolls f
 
 		note: if we can't make it work, then use a two member tuple.
 		'''
+		pass #@todo(aaron) code this
 		while True:
 			for dev_id in self.comm.get_remotes():
 				# 1. get data
