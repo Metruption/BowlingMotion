@@ -1,5 +1,7 @@
 import paho.mqtt.client as mqtt
 import re
+import json
+import time
 
 server_id = 'aws'
 
@@ -7,6 +9,7 @@ class Comm:
     remotes = []
     is_there_server = False
     on_change = lambda: None
+    sensor_data = {}
     def __init__(self, host, on_change, id='game'):
         # members
         Comm.client = mqtt.Client(client_id=id)
@@ -36,6 +39,7 @@ class Comm:
         print("Start collecting data...")
         client.subscribe("status/server/" + server_id)
         client.subscribe("status/device/+")
+        client.subscribe("device/+")
         pass
 
     # The callback for when a PUBLISH message is received from the server.
@@ -54,10 +58,29 @@ class Comm:
             is_changed = True
         # Add remotes
         if (re.match("status/device/\d*", msg.topic)):
+            add_or_remove = False
+            if msg.payload.decode() == "1":
+                add_or_remove = True
             device_num = int(msg.topic[len("status/device/"):])
-            Comm.remotes.append(device_num)
+            if add_or_remove:
+                Comm.remotes.append(device_num)
+                Comm.sensor_data[device_num] = None
+                print(str(device_num) + ' added!')
+            else:
+                Comm.remotes.remove(device_num)
+                Comm.sensor_data.pop(device_num)
+                print(str(device_num) + ' Deleted')
+            print('Now '+str(Comm.remotes))
             is_changed = True
-            print(str(device_num) + ' added!')
+        # Update remote sensor data
+        if (re.match("device/\d*", msg.topic)):
+            device_num = int(msg.topic[len("device/"):])
+            data = json.loads(msg.payload)
+            # Last updated time
+            data["last_updated"] = time.time()
+            Comm.sensor_data[device_num] = data
+            print('Data from '+ str(device_num) + ": " + str(data))
+            is_changed = True
         # Trigger event
         if is_changed:
             Comm.on_change()
@@ -86,8 +109,4 @@ if __name__ == "__main__":
 
     # Infinite loop
     while True:
-        pass
-
-
-
-
+        time.sleep(1000)
