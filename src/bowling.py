@@ -75,9 +75,12 @@ class Lane:
 		return math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
 
 	def split_vector(angle, magnitude):#@debug, may need to switch these
-		x = magnitude * math.cos(angle)
-		y = magnitude * math.sin(angle)
+		x = magnitude * math.radians(math.cos(angle))
+		y = magnitude * math.radians(math.sin(angle))
 		return x,y
+
+	def slope(x1, y1, x2, y2):
+		return (y1-y2)/(x1-x2)
 
 	def collide_circles(rad1, x1, y1, rad2, x2, y2):
 		'''
@@ -91,10 +94,8 @@ class Lane:
 		first value is the force impacted on the circles
 		second value is the angle of the force impacted on the second circle
 		'''
-		intersect_len = abs(distance(x1,y1,x2,y2) - rad1 - rad2)
-		radrat = rad1/rad2
-		thezone = intersect_len * radrat
-		force = thezone * physics_coefficent
+		force,clen = calculate_overlap(x1, y1, rad1, x2, y2, rad2)#clen is chord length
+		force = force * physics_coefficent
 
 		if x1 == x2:
 			angle = 0 #@debug switch these
@@ -102,8 +103,19 @@ class Lane:
 			angle = 180 #might need to switch the 0 and 180, although this should be so rare that we dont notice this bug
 		else:
 			#how do i get this angle?
-			angle = "@todo(aaron) code this"
+			angle = slope(x1,y2,x2,y2)
+			angle = math.degrees(math.atan(slope))
 		return force,angle
+
+	def calculate_overlap(x0, y0, r0, x1, y1, r1)#from stackexchange https://math.stackexchange.com/questions/97850/get-the-size-of-an-area-defined-by-2-overlapping-circles
+		rr0 = r0*r0;
+		rr1 = r1*r1;
+		c = Math.sqrt((x1-x0)*(x1-x0) + (y1-y0)*(y1-y0));
+		phi = (math.acos((rr0+(c*c)-rr1) / (2*r0*c)))*2;
+		theta = (math.acos((rr1+(c*c)-rr0) / (2*r1*c)))*2;
+		area1 = 0.5*theta*rr1 - 0.5*rr1*math.sin(theta);
+		area2 = 0.5*phi*rr0 - 0.5*rr0*math.sin(phi);
+		return area1 + area2,c
 
 	def unfuck_angle(angle_): #i later realized I can just do -force instead FUCK
 		angle_ = angle_ + 180
@@ -122,7 +134,6 @@ class Lane:
 			ball_x = ball_x + ball_xvel
 			ball_y = ball_y + ball_yvel
 
-
 		def impact_ball(force, angle):
 			'''
 			@params:
@@ -133,8 +144,8 @@ class Lane:
 
 			returns the number of pins knocked down
 			'''
-			imp_x = force_ * math.sin(angle_) #these two might be mixed up
-			imp_y = force_ * math.cos(angle_) #@debug you should switch these
+			imp_x = force_ * math.sin(math.radians(angle_)) #these two might be mixed up
+			imp_y = force_ * math.cos(math.radians(angle_)) #@debug you should switch these
 
 
 		ball_y = 0.0
