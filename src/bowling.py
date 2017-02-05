@@ -116,6 +116,12 @@ class BowlingGame: #@todo(bumsik): add a socket and eventlistener to get rolls f
 			pins_knocked = len([not pin.standing for pin in self.pins if not pin.standing])
 			render_lane()
 			#@todo(aaron) make it send pins_kocked to some kind of scoreboard
+			lazy_event_handler = not lazy_event_handler
+			if pins_knocked == 10 or lazy_event_handler:
+				frame_event = pygame.event.Event(NEW_FRAME)
+			else:
+				frame_event = pygame.event.Event(CONTINUE_FRAME)
+			pygame.event.post(frame_event)
 
 	def is_on_screen(Actor):
 		'''
