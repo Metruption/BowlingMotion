@@ -7,6 +7,7 @@ import comm
 import time
 from events import NEW_FRAME, CONTINUE_FRAME, GAME_END
 from pygame.locals import *
+import mathutil
 
 PIN_LOCATIONS = [
 [720,30],		#pin 1
@@ -34,7 +35,7 @@ class BowlingGame: #@todo(bumsik): add a socket and eventlistener to get rolls f
 		# Connect server
 		self.comm = comm.Comm(host="ec2-52-23-213-20.compute-1.amazonaws.com", on_change=lambda: None)
 		# wait for 3 second. To connect things
-		time.sleep(3)
+		time.sleep(5)
 
 		# Init game
 		pygame.init
@@ -47,12 +48,15 @@ class BowlingGame: #@todo(bumsik): add a socket and eventlistener to get rolls f
 		game_window = pygame.display.set_mode((800, 600))
 		pygame.display.set_caption('Bowling Motion')
 
-		lazy_event_handler = True
+		self.lazy_event_handler = True
 		#this is just whether or not to start a new frame
 		#in case we don't have time to add proper scoring
 		self.actors = []
 		self.ball = engine.Ball()
 		self.reset_pins()
+
+		frame_event = pygame.event.Event(NEW_FRAME)
+		pygame.event.post(frame_event)
 
 		while True: # main game loop
 			for event in pygame.event.get():
@@ -62,9 +66,11 @@ class BowlingGame: #@todo(bumsik): add a socket and eventlistener to get rolls f
 
 				if event.type == NEW_FRAME: #@todo(jamie) have the scorer create a NEW_FRAME event after each frame
 					self.reset_pins()
+					print("wait_for_server")
 					self.throw_ball(self.wait_for_server())
 
 				if event.type == CONTINUE_FRAME:
+					print("wait_for_server")
 					self.throw_ball(self.wait_for_server())
 
 				if event.type == GAME_END:
@@ -83,13 +89,18 @@ class BowlingGame: #@todo(bumsik): add a socket and eventlistener to get rolls f
 		#@todo(aaron): figure out how the y_bounds will be stored
 		self.populate_actorlist()
 
-	def throw_ball(self, x_force, y_force):
+	def throw_ball(self, data):
 		'''
 		@params:
 			x_force is a real number
 			y_force is a real number
 		'''
-		self.fball.reset(self)
+
+		x_force = data[0]
+		y_force = data[1]
+
+		self.ball.reset()
+		self.ball.impact(x_force, y_force)
 
 		pins_knocked = 0
 		continue_simulation = True
@@ -97,14 +108,14 @@ class BowlingGame: #@todo(bumsik): add a socket and eventlistener to get rolls f
 						#we don't need to do physics until the ball is near the pins
 
 		while continue_simulation:
-			if ball_x > 50.75 or ball_x < 9.25: #check if the ball is in the gutters
+			if self.ball.xpos > 50.75 or self.ball.ypos < 9.25: #check if the ball is in the gutters
 				continue_simulation = False
 				#this is a gutter ball!
 
 			for actor in self.actors:
 				actor.update_position()
 			
-			physics = ball_y >= 720 - ball_radius - Pin.radius #we don't bother calculating the pysics
+			physics = self.ball.ypos >= 720 - self.ball.radius - self.pins[0].radius #we don't bother calculating the pysics
 																#until the ball is near the pins
 
 			if physics:
@@ -115,6 +126,16 @@ class BowlingGame: #@todo(bumsik): add a socket and eventlistener to get rolls f
 					for actor in self.actors:
 						current_actor.detect_collision(actor)
 
+			if mathutil.distance(self.ball.xpos, self.ball.ypos, self.pins[1].xpos, self.pins[1].ypos):
+				print("Error: you threw the ball the wrong way. Try again? The pins have been reset")
+				if pins_knocked == 10 or lazy_event_handler:
+					frame_event = pygame.event.Event(NEW_FRAME)
+					print("Starting new bowling frame.")
+				else:
+					frame_event = pygame.event.Event(CONTINUE_FRAME)
+				pygame.event.post(frame_event)
+				return None
+
 			self.populate_actorlist()
 			self.actors = [actor for actor in self.actors if is_on_screen(actor)]
 			self.render_lane()
@@ -123,8 +144,8 @@ class BowlingGame: #@todo(bumsik): add a socket and eventlistener to get rolls f
 			pins_knocked = len([not pin.standing for pin in self.pins if not pin.standing])
 			print("You knocked over {} pins!".format(pins_knocked))
 
-			lazy_event_handler = not lazy_event_handler
-			if pins_knocked == 10 or lazy_event_handler:
+			self.lazy_event_handler = not self.lazy_event_handler
+			if pins_knocked == 10 or self.lazy_event_handler:
 				frame_event = pygame.event.Event(NEW_FRAME)
 				print("Starting new bowling frame.")
 			else:
@@ -150,7 +171,6 @@ class BowlingGame: #@todo(bumsik): add a socket and eventlistener to get rolls f
 
 		note: if we can't make it work, then use a two member tuple.
 		'''
-		pass #@todo(aaron) code this
 		while True:
 			for dev_id in self.comm.get_remotes():
 				# 1. get data
@@ -163,7 +183,7 @@ class BowlingGame: #@todo(bumsik): add a socket and eventlistener to get rolls f
 				# FIXME: @kbumsik improve calculation of x and y. Currently only average list
 				for axis in ("x", "y"):
 					data[axis] = sum(data[axis]) / len(data[axis])
-				return (data["x"], data["y"])
+				return (data["x"], data["y"],)
 
 	def render_lane(self):
 		'''
@@ -171,6 +191,7 @@ class BowlingGame: #@todo(bumsik): add a socket and eventlistener to get rolls f
 		@todo(aaron)
 		'''
 		pass
+
 
 	def populate_actorlist(self):
 		actors = [pin for pin in self.pins]

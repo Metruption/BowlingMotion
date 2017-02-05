@@ -120,7 +120,7 @@ class Comm:
         # Update remote sensor data
         if (re.match("device/\d*", msg.topic)):
             device_num = int(msg.topic[len("device/"):])
-            data = json.loads(msg.payload)
+            data = json.loads(msg.payload.decode())
             # Last updated time
             data["last_updated"] = time.time()
             Comm.sensor_data[device_num] = data
