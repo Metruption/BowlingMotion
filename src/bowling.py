@@ -3,7 +3,7 @@ import math
 import pygame
 import sys
 import engine
-from .comm import Comm
+import comm
 import time
 from events import NEW_FRAME, CONTINUE_FRAME, GAME_END
 
@@ -31,7 +31,7 @@ if __name__ == '__main__':
 class BowlingGame: #@todo(bumsik): add a socket and eventlistener to get rolls from the server
 	def __init__(self):
 		# Connect server
-		self.comm = Comm(host="ec2-52-23-213-20.compute-1.amazonaws.com", on_change=lambda: None)
+		self.comm = comm.Comm(host="ec2-52-23-213-20.compute-1.amazonaws.com", on_change=lambda: None)
 		# wait for 3 second. To connect things
 		time.sleep(3)
 
@@ -39,57 +39,106 @@ class BowlingGame: #@todo(bumsik): add a socket and eventlistener to get rolls f
 		pygame.init
 
 		#load images
-		pin_images = [pygame.image.load('../assets/pin{}.png'.format(i)).convert() for i in [90,70,40,0]]
-		ball_image = pygame.image.load('../assets/ball.png').convert()
-		lane_image = pygame.image.load('../assets/lane.png').convert()
+		# pin_images = [pygame.image.load('../assets/pin{}.png'.format(i)).convert() for i in [90,70,40,0]]
+		# ball_image = pygame.image.load('../assets/ball.png').convert()
+		# lane_image = pygame.image.load('../assets/lane.png').convert()
 
 		game_window = pygame.display.set_mode((800, 600))
+		pygame.display.set_caption('Bowling Motion')
 
-		ball = engine.Ball()
-		reset_pins()
+		lazy_event_handler = True
+		#this is just whether or not to start a new frame
+		#in case we don't have time to add proper scoring
+		self.actors = []
+		self.ball = engine.Ball()
+		self.reset_pins()
+
 		while True: # main game loop
 			for event in pygame.event.get():
 				if event.type == QUIT:
 					pygame.quit()
 					sys.exit()
 
-				if event.type == NEW_FRAME #@todo(jamie) have the scorer create a NEW_FRAME event after each frame
-					reset_pins()
-					throw_ball(wait_for_server())
+				if event.type == NEW_FRAME: #@todo(jamie) have the scorer create a NEW_FRAME event after each frame
+					self.reset_pins()
+					self.throw_ball(self.wait_for_server())
 
-				if event.type == CONTINUE_FRAME
-					throw_ball(wait_for_server())
+				if event.type == CONTINUE_FRAME:
+					self.throw_ball(self.wait_for_server())
 
 				if event.type == GAME_END:
 					pass #what it should actually do @todo(aaron):
 							#display text saying throw another ball to restart the game
 							#create a NEW_FRAME event  
+							#as long as we use lazy_event_handler this won't matter
 
-	def reset_pins():
+	def reset_pins(self):
 		self.pins = []
 		for i in range(10):
 			y_pos = PIN_LOCATIONS[i][0]
 			x_pos = PIN_LOCATIONS[i][0]
 			self.pins.append(engine.Pin(x_pos, y_pos))
 		#@todo(aaron): add something to reset the y_bounds
-		#@todo(aaron): figure out how 
+		#@todo(aaron): figure out how the y_bounds will be stored
+		self.populate_actorlist()
 
-	def throw_ball(x_force, y_force):
+	def throw_ball(self, x_force, y_force):
 		'''
 		@params:
 			x_force is a real number
 			y_force is a real number
 		'''
-			pass #@todo(aaron) code this
+		Ball.reset(self)
 
-	def is_on_screen(Actor):
+		pins_knocked = 0
+		continue_simulation = True
+		physics = False #this is set to false
+						#we don't need to do physics until the ball is near the pins
+
+		while continue_simulation:
+			if ball_x > 50.75 or ball_x < 9.25: #check if the ball is in the gutters
+				continue_simulation = False
+				#this is a gutter ball!
+
+			for actor in self.actors:
+				actor.update_position()
+			
+			physics = ball_y >= 720 - ball_radius - Pin.radius #we don't bother calculating the pysics
+																#until the ball is near the pins
+
+			if physics:
+				while(len(actors)) > 0:
+					current_actor = self.actors[1]
+					self.actors.remove(1)
+
+					for actor in self.actors:
+						current_actor.detect_collision(actor)
+
+			self.populate_actorlist()
+			self.actors = [actor for actor in self.actors if is_on_screen(actor)]
+			self.render_lane()
+
+			#@todo(aaron) make it send pins_kocked to some kind of scoreboard
+			pins_knocked = len([not pin.standing for pin in self.pins if not pin.standing])
+			print("You knocked over {} pins!".format(pins_knocked))
+
+			lazy_event_handler = not lazy_event_handler
+			if pins_knocked == 10 or lazy_event_handler:
+				frame_event = pygame.event.Event(NEW_FRAME)
+				print("Starting new bowling frame.")
+			else:
+				frame_event = pygame.event.Event(CONTINUE_FRAME)
+			pygame.event.post(frame_event)
+
+
+	def is_on_screen(self, Actor):
 		'''
 		@params:
 			Actor is an actor that the game needs to keep track of
 
 		returns true if Actor is in the part of the bowling alley that we are rendering.
 		'''
-		if 
+		pass #@todo(aaron) code this
 
 	def wait_for_server(self):
 		'''
@@ -113,15 +162,19 @@ class BowlingGame: #@todo(bumsik): add a socket and eventlistener to get rolls f
 				# FIXME: @kbumsik improve calculation of x and y. Currently only average list
 				for axis in ("x", "y"):
 					data[axis] = sum(data[axis]) / len(data[axis])
-				yield (data["x"], data["y"])
-		pass
+				return (data["x"], data["y"])
 
-	def render_lane():
+	def render_lane(self):
 		'''
 		implement this LAST
 		@todo(aaron)
 		'''
 		pass
+
+	def populate_actorlist(self):
+		actors = [pin for pin in self.pins]
+		actors.append(self.Ball)
+		self.actors = actors
 
 
 

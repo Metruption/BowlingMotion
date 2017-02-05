@@ -5,7 +5,7 @@ import mathutil
 def main():
 	print("Not for human consumption. Please evacuate the premises.")
 
-if name == '__main__':
+if __name__ == '__main__':
 	main()
 
 class Actor:
@@ -24,14 +24,14 @@ class Actor:
 		self.frict = frict
 
 
-	def impact(xforce, yforce):
+	def impact(self, xforce, yforce):
 		dx = xforce / self.mass
 		dy = yforce / self.mass
 		self.xvel += dx
 		self.yvel += dy
 
 
-	def detect_collision(target):
+	def detect_collision(self, target):
 		'''
 		@params:
 			target is an Actor
@@ -45,7 +45,7 @@ class Actor:
 		return safe_zone > distance
 
 
-	def resolve_collision(target):
+	def resolve_collision(self, target):
 		'''
 		@params:
 			target is an Actor
@@ -76,22 +76,32 @@ class Actor:
 												#then you need to switch the minuses around
 		return True
 
+		def update_position(self):
+			'''
+			updates the actor's position
+			it will move its velocity in units
+			'''
+			xpos += xvel
+			ypos += yvel
+
+
 
 
 class Pin(Actor):
-	def __init__(self, radius2=2.5, mass=1.5, frict=5, xpos, ypos):
+	def __init__(self, xpos, ypos, radius2=2.5, mass=1.5, frict=5):
 		Actor.__init__(radius, mass, frict, xpos, ypos)
 		standing = True
 
-	def impact(xforce, yforce):
+	def impact(self, xforce, yforce):
 		Actor.impact(xforce, yforce)
 		if math.sqrt(xforce**2 + yforce**2) > mass:
 			standing = False
 
 class Ball(Actor): #yeah this is just a wrapper...
 	def __init__(self, radius=4.25, mass=10, frict=1.1, xpos=30, ypos=0):
-		Actor.__init__(radius, mass, frict, xpos, ypos)
+		Actor.__init__(self, radius, mass, frict, xpos, ypos)
+		None #if this makes it work i fucking swear to god
 
-	def reset():
+	def reset(self):
 		self.xpos = 30
 		self.ypos = 0
