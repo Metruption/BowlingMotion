@@ -10,7 +10,7 @@ Motion controlled bowling with android phones
 
 **Resolving the dependencies:**
 ```bash
-pip install paho-mqtt numpy matplotlib
+pip install Pygame paho-mqtt numpy matplotlib
 ```
 
 ### Known issues:
