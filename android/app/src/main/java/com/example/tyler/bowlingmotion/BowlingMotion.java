@@ -100,6 +100,11 @@ public class BowlingMotion extends AppCompatActivity implements SensorEventListe
         yStream=new ConcurrentLinkedQueue<Float>();
         zStream=new ConcurrentLinkedQueue<Float>();
         timeStream=new ConcurrentLinkedQueue<>();
+
+        // set device ID
+        Random randy=new Random();
+        int rand=randy.nextInt(9999);
+        deviceID = Integer.toString(rand);
     }
     /*sends the data that was collected when the buttons was pressed down
      converts the queues collected during the pressdown to jsonn arrays
@@ -145,9 +150,6 @@ public class BowlingMotion extends AppCompatActivity implements SensorEventListe
     /*connects app to server, is done when app is restarted or initialized*/
 
     private void connectToServer() {
-        Random randy=new Random();
-        int rand=randy.nextInt(9999);
-        deviceID = Integer.toString(rand);
         String clientId = MqttClient.generateClientId();
         // Set destination server
         client =
@@ -195,6 +197,18 @@ public class BowlingMotion extends AppCompatActivity implements SensorEventListe
         } catch (MqttException e) {
             e.printStackTrace();
         }
+        client.close();
+    }
+
+    protected void onDestroy() {
+        super.onDestroy();
+        manager.unregisterListener(this);
+        try {
+            client.disconnect();
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
+        client.close();
     }
 
     protected void onResume() {
@@ -264,13 +278,15 @@ button is released, need to be in a separate anonymous class in order to not get
                 mHandler.postDelayed(new Runnable() {
                     public void run() {
                         int time = (int) (System.currentTimeMillis());
-                        if(time%50==0) {
+                        if(time%40==0) {
+                            /*
                             if(xStream.size()>9){
                                 xStream.remove();
                                 yStream.remove();
                                 zStream.remove();
                                 timeStream.remove();
                             }
+                            */
                             b.setText("x:" + x + " y: " + y + " z: " + z);
                             xStream.add((Float)x);
                             yStream.add((Float)y);
