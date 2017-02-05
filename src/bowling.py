@@ -3,6 +3,7 @@ import math
 import pygame
 import sys
 import engine
+from events import NEW_FRAME, CONTINUE_FRAME, GAME_END
 
 PIN_LOCATIONS = [
 [720,30],		#pin 1
@@ -60,6 +61,8 @@ class BowlingGame: #@todo(bumsik): add a socket and eventlistener to get rolls f
 			y_pos = PIN_LOCATIONS[i][0]
 			x_pos = PIN_LOCATIONS[i][0]
 			self.pins.append(engine.Pin(x_pos, y_pos))
+		#@todo(aaron): add something to reset the y_bounds
+		#@todo(aaron): figure out how 
 
 	def throw_ball(x_force, y_force):
 		'''
@@ -76,8 +79,8 @@ class BowlingGame: #@todo(bumsik): add a socket and eventlistener to get rolls f
 
 		returns true if Actor is in the part of the bowling alley that we are rendering.
 		'''
-		if 
-
+		pass #@todo(aaron) code this
+		
 	def wait_for_server():
 		'''
 		Waits until the server sends data, then returns an interpretation of the data.

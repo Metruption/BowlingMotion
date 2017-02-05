@@ -65,7 +65,7 @@ class Actor:
 		overlap_size = radii_sum - distance
 		impact_total = radii_ratio * overlap_size #this code approximates the impacts, and will probably not be satisfactory
 
-		impact_angle = math.atan(slope(self.xpos, self.ypos, target.xpos, target.ypos))
+		impact_angle = math.atan(mathutil.slope(self.xpos, self.ypos, target.xpos, target.ypos))
 		x_impact = impact_total * math.cos(impact_angle)
 		y_impact = impact_total * math.sin(impact_angle)
 		#the angle is correct (although you might need to switch the cos and sin)
