@@ -44,6 +44,7 @@ class BowlingGame: #@todo(bumsik): add a socket and eventlistener to get rolls f
 		lane_image = pygame.image.load('../assets/lane.png').convert()
 
 		game_window = pygame.display.set_mode((800, 600))
+		pygame.display.set_caption('Bowling Motion')
 
 		lazy_event_handler = True
 		#this is just whether or not to start a new frame
@@ -101,7 +102,20 @@ class BowlingGame: #@todo(bumsik): add a socket and eventlistener to get rolls f
 
 			for actor in self.actors:
 				actor.update_position()
-			#@todo(aaron) finish coding this
+			
+			if physics:
+				while(len(actors)) > 0
+					current_actor = self.actors[1]
+					self.actors.remove(1)
+
+					for actor in self.actors:
+						current_actor.detect_collision(actor)
+
+			populate_actorlist()
+			self.actors = [actor for actor in self.actors if is_on_screen(actor)]
+			pins_knocked = len([not pin.standing for pin in self.pins if not pin.standing])
+			render_lane()
+			#@todo(aaron) make it send pins_kocked to some kind of scoreboard
 
 	def is_on_screen(Actor):
 		'''
