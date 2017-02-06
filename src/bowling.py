@@ -33,7 +33,7 @@ if __name__ == '__main__':
 class BowlingGame: #@todo(bumsik): add a socket and eventlistener to get rolls from the server
 	def __init__(self):
 		# Connect server
-		self.comm = comm.Comm(host="ec2-52-23-213-20.compute-1.amazonaws.com", on_change=lambda: None)
+		self.comm = comm.Comm(host="ec2-52-23-213-20.compute-1.amazonaws.com")
 		# wait for 3 second. To connect things
 		time.sleep(5)
 
@@ -45,7 +45,7 @@ class BowlingGame: #@todo(bumsik): add a socket and eventlistener to get rolls f
 		# ball_image = pygame.image.load('../assets/ball.png').convert()
 		# lane_image = pygame.image.load('../assets/lane.png').convert()
 
-		game_window = pygame.display.set_mode((800, 600))
+		game_window = pygame.display.set_mode((1, 1))
 		pygame.display.set_caption('Bowling Motion')
 
 		self.lazy_event_handler = True
@@ -126,15 +126,16 @@ class BowlingGame: #@todo(bumsik): add a socket and eventlistener to get rolls f
 					for actor in self.actors:
 						current_actor.detect_collision(actor)
 
+			#if the ball is somehow rolled the wrong way
+			#@todo(will) make code to interpret the comms data so this never happens
 			if mathutil.distance(self.ball.xpos, self.ball.ypos, self.pins[1].xpos, self.pins[1].ypos):
-				print("Error: you threw the ball the wrong way. Try again? The pins have been reset")
-				if pins_knocked == 10 or lazy_event_handler:
+				if pins_knocked == 10 or self.lazy_event_handler:
 					frame_event = pygame.event.Event(NEW_FRAME)
 					print("Starting new bowling frame.")
 				else:
 					frame_event = pygame.event.Event(CONTINUE_FRAME)
 				pygame.event.post(frame_event)
-				return None
+				return 0
 
 			self.populate_actorlist()
 			self.actors = [actor for actor in self.actors if is_on_screen(actor)]
@@ -171,19 +172,18 @@ class BowlingGame: #@todo(bumsik): add a socket and eventlistener to get rolls f
 
 		note: if we can't make it work, then use a two member tuple.
 		'''
-		while True:
-			for dev_id in self.comm.get_remotes():
-				# 1. get data
-				print("wait for " + str(dev_id) + "...")
-				data = self.comm.get_data_wait(dev_id)
-				print("Data taken: " + str(data))
-				# 2. plot
-				self.comm.plot(data)
-				# 3. calculate
-				# FIXME: @kbumsik improve calculation of x and y. Currently only average list
-				for axis in ("x", "y"):
-					data[axis] = sum(data[axis]) / len(data[axis])
-				return (data["x"], data["y"],)
+		# 1. get data
+		(data, dev_id) = self.comm.get_data_wait_for_change()
+		print("from " + str(dev_id) + "Data taken: " + str(data))
+		# 2. plot
+		self.comm.plot(data)
+		# 3. calculate
+		# FIXME: @kbumsik improve calculation of x and y. Currently only average list
+		for axis in ("x", "y"):
+			data[axis] = sum(data[axis]) / len(data[axis])
+		result = (data["x"], data["y"],)
+		print("Result: " + str(result))
+		return result
 
 	def render_lane(self):
 		'''

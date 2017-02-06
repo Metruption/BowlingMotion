@@ -15,7 +15,9 @@ class Comm:
     is_there_server = False
     on_change = lambda: None
     sensor_data = {}
-    def __init__(self, host, on_change, id='game'):
+    is_changed = False
+    changed_id = 0
+    def __init__(self, host, id='game'):
         # members
         Comm.client = mqtt.Client(client_id=id)
 
@@ -63,6 +65,13 @@ class Comm:
             pass
         return self.get_data_now(id)
 
+    def get_data_wait_for_change(self):
+        Comm.is_changed = False
+        while not Comm.is_changed:
+            pass
+        Comm.is_changed = False
+        return (self.get_data_now(Comm.changed_id), Comm.changed_id)
+
     def plot(self, data):
         # Plot
         x = data["x"]
@@ -88,6 +97,7 @@ class Comm:
     def on_message(client, userdata, msg):
         # print("Topic: "+msg.topic+"\n\tPayload: "+str(msg.payload))
         is_changed = False
+        device_num = 0
         # Update server status
         if ("status/server/" + server_id) == msg.topic:
             if msg.payload.decode() == "1":
@@ -102,19 +112,19 @@ class Comm:
             add_or_remove = False
             if msg.payload.decode() == "1":
                 add_or_remove = True
-            device_num = int(msg.topic[len("status/device/"):])
-            if add_or_remove and (device_num not in Comm.remotes):
-                Comm.remotes.append(device_num)
-                Comm.sensor_data[device_num] = {"last_updated":time.time()}
-                print(str(device_num) + ' added!')
+            new_dev_num = int(msg.topic[len("status/device/"):])
+            if add_or_remove and (new_dev_num not in Comm.remotes):
+                Comm.remotes.append(new_dev_num)
+                Comm.sensor_data[new_dev_num] = {"last_updated":time.time()}
+                print(str(new_dev_num) + ' added!')
                 is_changed = True
-            elif add_or_remove and (device_num in Comm.remotes):
+            elif add_or_remove and (new_dev_num in Comm.remotes):
                 # No change
                 pass
             else:
-                Comm.remotes.remove(device_num)
-                Comm.sensor_data.pop(device_num)
-                print(str(device_num) + ' Deleted')
+                Comm.remotes.remove(new_dev_num)
+                Comm.sensor_data.pop(new_dev_num)
+                print(str(new_dev_num) + ' Deleted')
                 is_changed = True
             print('Now '+str(Comm.remotes))
         # Update remote sensor data
@@ -128,7 +138,15 @@ class Comm:
             is_changed = True
         # Trigger event
         if is_changed:
-            Comm.on_change()
+            Comm.on_change(device_num)
+        pass
+
+    @staticmethod
+    def on_change(device_id):
+        if device_id is not 0:
+            Comm.is_changed = True
+            Comm.changed_id = device_id
+        print("Something changed")
         pass
 '''
     # Connect remotes
@@ -145,13 +163,10 @@ class Comm:
         ##
 '''
 
-def on_change():
-    print("Something changed")
-    pass
 
 
 if __name__ == "__main__":
-    comm = Comm(host="ec2-52-23-213-20.compute-1.amazonaws.com", on_change=on_change)
+    comm = Comm(host="ec2-52-23-213-20.compute-1.amazonaws.com")
     # wait for 5 second.
     time.sleep(3)
 
